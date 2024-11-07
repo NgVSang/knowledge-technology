@@ -1,4 +1,11 @@
-import React, { FC, useCallback, useMemo, useState } from "react";
+import React, {
+  FC,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { ContentQuizProps } from "./ContentQuiz.types";
 import Image from "next/image";
 import { DefaultAvatarIcon, DisLikeIcon, SmallLogoIcon } from "@/assets/icons";
@@ -6,11 +13,22 @@ import { useSelector } from "react-redux";
 import { authSelector } from "@/redux/reducers";
 import toast from "react-hot-toast";
 import { ModelApi } from "@/services";
+import {
+  ForceGraph2D,
+  ForceGraph3D,
+  ForceGraphVR,
+  ForceGraphAR,
+} from "react-force-graph";
+import dynamic from "next/dynamic";
+
 //@ts-ignore
 import Graph from "react-graph-vis";
 
 const ContentQuiz: FC<ContentQuizProps> = ({ data }) => {
   const { loggedin, user } = useSelector(authSelector);
+  const layoutRef = useRef<any>(null);
+  const [width, setWidth] = useState(0);
+  const [component, setComponent] = useState<JSX.Element>();
   const [show, setShow] = useState(false);
   const [bad, setBad] = useState(false);
 
@@ -30,7 +48,7 @@ const ContentQuiz: FC<ContentQuizProps> = ({ data }) => {
   const nodes = useMemo(() => {
     const grap_data: {
       id: number;
-      label: string;
+      name: string;
       color: string;
     }[] = [];
     const graph = data.graph || [];
@@ -42,60 +60,62 @@ const ContentQuiz: FC<ContentQuizProps> = ({ data }) => {
       if (!find_1) {
         grap_data.push({
           id: data.source,
-          label: data.source_name,
+          name: data.source_name,
           color: color,
         });
       }
       if (!find_2) {
         grap_data.push({
           id: data.target,
-          label: data.target_name,
-          color,
+          name: data.target_name,
+          color: color,
         });
       }
     }
     return grap_data;
   }, [data.graph]);
 
-  const edges = useMemo(() => {
+  const links = useMemo(() => {
     const edges_data = [];
     const graph = data.graph || [];
     for (let i = 0; i < graph.length; i++) {
       edges_data.push({
-        from: graph[i].source,
-        to: graph[i].target,
-        label: graph[i].predicate,
+        source: graph[i].source,
+        target: graph[i].target,
+        name: graph[i].predicate,
+        color: "white",
       });
     }
 
     return edges_data;
   }, [data.graph]);
 
-  const feedbackList = useMemo(() => {
-    return [
-      "Wrong answer!",
-      "Wrong explain!",
-      "Wrong both answer and explain!",
-    ];
-  }, []);
-
-  const handleFeedback = useCallback(async (feedback: string) => {
-    try {
-      const loadingId = toast.loading("Sending feedback!");
-      const res = await ModelApi.ratingConversationContent(data._id, feedback);
-      toast.remove(loadingId);
-      toast.success(res.data?.message && "Thank you for your feedback!");
-    } catch (error: any) {
-      toast.error(error?.message && "Fail to send feedback, please try again!");
-    } finally {
-      setShow(false);
-      setBad(false);
+  useEffect(() => {
+    if (layoutRef.current) {
+      setWidth(layoutRef.current.offsetWidth); // Lấy width ban đầu
     }
   }, []);
 
-  const handleBadResponse = useCallback(() => {
-    setBad(true);
-  }, []);
+  useEffect(() => {
+    async function loadModule() {
+      const { ForceGraph3D } = await import("react-force-graph");
+      setComponent(
+        <ForceGraph3D
+          graphData={{
+            nodes: nodes,
+            links: links,
+          }}
+          height={500}
+          width={width}
+          backgroundColor="black"
+          linkDirectionalArrowLength={3}
+          linkDirectionalArrowResolution={5}
+          linkDirectionalArrowRelPos={1}
+        />
+      );
+    }
+    void loadModule();
+  }, [nodes, links, width]);
 
   if (data.type === "ASK") {
     return (
@@ -121,7 +141,7 @@ const ContentQuiz: FC<ContentQuizProps> = ({ data }) => {
 
   return (
     <div
-      className="flex flex-row px-[20px] pt-[30px] items-start gap-2 w-full"
+      className="flex flex-row px-[20px] pt-[30px] items-start gap-2 w-full "
       onMouseEnter={() => {
         setShow(true);
       }}
@@ -140,60 +160,11 @@ const ContentQuiz: FC<ContentQuizProps> = ({ data }) => {
           </p>
         </div>
         {data.graph && data.graph.length > 0 && (
-          <div className="flex h-[700px] w-full bg-slate-100 rounded-[4px]">
-            <Graph
-              key={Math.random()}
-              graph={{
-                nodes: nodes,
-                edges: edges,
-              }}
-              options={{
-                layout: {
-                  hierarchical: true,
-                },
-              }}
-              events={{}}
-            />
-          </div>
-        )}
-        <div className="flex flex-row h-[30px]">
-          {show && (
-            <Image
-              alt="DisLikeIcon"
-              src={DisLikeIcon}
-              title="Bad response"
-              className="w-[20px] h-[20px] cursor-pointer bg-white"
-              onClick={handleBadResponse}
-            />
-          )}
-        </div>
-        {bad && (
-          <div className="p-[15px] border border-black rounded-[10px]">
-            <div className="w-full flex flex-row justify-between pb-5 items-center">
-              <span className="text-gray-500 font-sans text-base">
-                Tell us more:
-              </span>
-              <span
-                className="text-gray-600 font-sans text-base cursor-pointer hover:text-gray-800 p-1"
-                onClick={() => {
-                  setBad(false);
-                }}
-              >
-                X
-              </span>
-            </div>
-            <div className="w-full flex flex-row flex-wrap gap-5">
-              {feedbackList.map((data) => (
-                <div
-                  className="px-[12px] py-[4px] text-sm font-sans text-gray-500 cursor-pointer border border-gray-500 rounded-[8px] hover:text-gray-800 hover:border-gray-800"
-                  onClick={() => {
-                    handleFeedback(data);
-                  }}
-                >
-                  {data}
-                </div>
-              ))}
-            </div>
+          <div
+            className="flex h-[500px] w-full bg-slate-100 rounded-[4px]"
+            ref={layoutRef}
+          >
+            {component}
           </div>
         )}
       </div>
