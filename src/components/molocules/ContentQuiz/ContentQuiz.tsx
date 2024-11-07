@@ -14,26 +14,43 @@ const ContentQuiz: FC<ContentQuizProps> = ({ data }) => {
   const [show, setShow] = useState(false);
   const [bad, setBad] = useState(false);
 
+  function randomColor() {
+    const red = Math.floor(Math.random() * 256)
+      .toString(16)
+      .padStart(2, "0");
+    const green = Math.floor(Math.random() * 256)
+      .toString(16)
+      .padStart(2, "0");
+    const blue = Math.floor(Math.random() * 256)
+      .toString(16)
+      .padStart(2, "0");
+    return `#${red}${green}${blue}`;
+  }
+
   const nodes = useMemo(() => {
     const grap_data: {
       id: number;
       label: string;
+      color: string;
     }[] = [];
     const graph = data.graph || [];
     for (let i = 0; i < graph.length; i++) {
       const data = graph[i];
       const find_1 = grap_data.find((e) => e.id === data.source);
       const find_2 = grap_data.find((e) => e.id === data.target);
+      const color = randomColor();
       if (!find_1) {
         grap_data.push({
           id: data.source,
           label: data.source_name,
+          color: color,
         });
       }
       if (!find_2) {
         grap_data.push({
           id: data.target,
           label: data.target_name,
+          color,
         });
       }
     }
@@ -89,11 +106,11 @@ const ContentQuiz: FC<ContentQuizProps> = ({ data }) => {
           className="w-[40px] h-[40px] rounded-full"
         />
         <div className=" flex flex-col gap-4 mt-[7px] w-full">
-          <span className="font-sans font-medium text-black text-base">
+          <span className="font-sans font-semibold text-black text-xl">
             {user?.name || "Customer"}
           </span>
           <div className="flex flex-col mt-[5px] gap-2">
-            <p className="font-sans font-semibold text-black text-xl mb-[10px]">
+            <p className="font-sans font-normal text-black text-base mb-[10px]">
               {data.question}
             </p>
           </div>
@@ -116,9 +133,9 @@ const ContentQuiz: FC<ContentQuizProps> = ({ data }) => {
         <Image src={SmallLogoIcon} alt="Logo" className="w-[20px] h-[20px]" />
       </div>
       <div className="flex flex-col gap-4 mt-[7px] w-full">
-        <span className="font-sans font-medium text-black text-base">Quiz</span>
+        <span className="font-sans font-semibold text-black text-xl">Quiz</span>
         <div className="flex flex-col mt-[5px] gap-2">
-          <p className="font-sans font-semibold text-black text-xl mb-[10px]">
+          <p className="font-sans font-medium text-black text-base mb-[10px]">
             {data.answer === "" ? "Not Found" : data.answer}
           </p>
         </div>
@@ -135,6 +152,7 @@ const ContentQuiz: FC<ContentQuizProps> = ({ data }) => {
                   hierarchical: true,
                 },
               }}
+              events={{}}
             />
           </div>
         )}

@@ -5,6 +5,7 @@ import { authSelector } from "@/redux/reducers";
 import { ModelApi } from "@/services";
 import { IContent, IConversation } from "@/types";
 import { Avatar, Button, Dropdown, Input, List, Skeleton } from "antd";
+import TextArea from "antd/es/input/TextArea";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import React, {
@@ -325,7 +326,7 @@ const Page = () => {
         </div>
         <div className="py-6 px-[20px] bg-gray-100 justify-center flex">
           <div className="gap-[15px] flex flex-col max-w-[900px] w-full">
-            <Input
+            <TextArea
               className="min-h-[40px] text-base text-black rounded-[12px] border-gray-400"
               placeholder="Question"
               value={question}
