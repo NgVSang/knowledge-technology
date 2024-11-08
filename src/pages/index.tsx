@@ -4,7 +4,7 @@ import { uppercaseLetters } from "@/constants";
 import { authSelector } from "@/redux/reducers";
 import { ModelApi } from "@/services";
 import { IContent, IConversation } from "@/types";
-import { Avatar, Button, Dropdown, Input, List, Skeleton } from "antd";
+import { Avatar, Button, Dropdown, Input, List, Modal, Skeleton } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -22,7 +22,8 @@ const Page = () => {
   const router = useRouter();
   const messageContainerRef = useRef<any>(null);
   const { user, loggedin } = useSelector(authSelector);
-
+  const [open, setOpen] = useState(false);
+  const [deleteData, setDeleteData] = useState<IConversation>();
   const [show, setShow] = useState(false);
   const [question, setQuestions] = useState("");
   const [data, setData] = useState<IConversation[]>([]);
@@ -171,8 +172,12 @@ const Page = () => {
           setCurrentConversation(undefined);
           setContents([]);
         }
+        toast.success("Delete conversation success!");
       } catch (error) {
         console.log(error);
+        toast.error("Delete conversation fail!");
+      } finally {
+        setOpen(false);
       }
     },
     [handleGetHistory, currentConversation]
@@ -204,7 +209,9 @@ const Page = () => {
                   active={currentConversation?._id === conversation._id}
                   className="gap-3"
                   onDelete={() => {
-                    handleDeleteChat(conversation._id);
+                    setOpen(true);
+                    setDeleteData(conversation);
+                    // handleDeleteChat(conversation._id);
                   }}
                   onClick={() => {
                     handleClickConversation(conversation);
@@ -316,6 +323,18 @@ const Page = () => {
           </div>
         </div>
       </div>
+      <Modal
+        open={open}
+        onOk={() => {
+          if (deleteData) handleDeleteChat(deleteData._id);
+        }}
+        onCancel={() => {
+          setOpen(false);
+        }}
+        title="Delete conversation"
+      >
+        <p>Do you want to delete this conversation ?</p>
+      </Modal>
     </div>
   );
 };

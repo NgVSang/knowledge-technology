@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from "react";
+import React, { FC, useMemo, useState } from "react";
 import { SidebarButtonProps } from "./SidebarButton.types";
 import Image from "next/image";
 import {
@@ -16,6 +16,7 @@ const SidebarButton: FC<SidebarButtonProps> = ({
   onDelete,
   ...props
 }) => {
+  const [hover, setHover] = useState(false);
   const icon = useMemo(() => {
     if (type === "action") {
       return (
@@ -44,28 +45,39 @@ const SidebarButton: FC<SidebarButtonProps> = ({
         <Image src={NewChatIcon} alt="New chat" className="w-[20px] h-[20px]" />
       );
     }
+    if (hover)
+      return (
+        <div className="flex justify-end items-end w-[20%] z-30 ">
+          <div
+            className="hover:bg-red-200 rounded-[4px] p-[2px]"
+            onClick={() => {
+              console.log("delete");
 
-    return (
-      <div className="flex justify-end items-end w-[20%] z-30 ">
-        <div
-          className="hover:bg-red-200 rounded-[4px] p-[2px]"
-          onClick={() => {
-            console.log("delete");
-
-            if (onDelete) onDelete();
-          }}
-        >
-          <Image src={DeleteIcon} alt="Delete" className="w-[20px] h-[20px]" />
+              if (onDelete) onDelete();
+            }}
+          >
+            <Image
+              src={DeleteIcon}
+              alt="Delete"
+              className="w-[20px] h-[20px]"
+            />
+          </div>
         </div>
-      </div>
-    );
-  }, [type]);
+      );
+    return <></>;
+  }, [type, hover]);
 
   return (
     <div
       className={`flex flex-row items-center cursor-pointer p-[10px] z-10 hover:bg-gray-200 rounded-xl justify-between ${className} ${
         active && "bg-gray-200"
       }`}
+      onMouseEnter={() => {
+        setHover(true);
+      }}
+      onMouseLeave={() => {
+        setHover(false);
+      }}
       {...props}
     >
       <div className="flex flex-row items-center gap-3 whitespace-nowrap w-[70%] overflow-hidden">
