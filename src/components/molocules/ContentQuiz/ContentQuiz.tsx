@@ -155,7 +155,7 @@ const ContentQuiz: FC<ContentQuizProps> = ({ data }) => {
       <div className="flex flex-col gap-4 mt-[7px] w-full">
         <span className="font-sans font-semibold text-black text-xl">Quiz</span>
         <div className="flex flex-col mt-[5px] gap-2">
-          <p className="font-sans font-medium text-black text-base mb-[10px]">
+          <p className="font-sans font-normal text-black text-base mb-[10px]">
             {data.answer === "" ? "Not Found" : data.answer}
           </p>
         </div>
