@@ -18,6 +18,10 @@ const getConversationUser = () => {
   return instance.get<any>("/conversation");
 };
 
+const deleteConversationUser = (id: string) => {
+  return instance.delete<any>(`/conversation/${id}`);
+};
+
 const getConversationContent = (id: string) => {
   return instance.get(`/conversation/${id}`);
 };
@@ -31,6 +35,7 @@ const ratingConversationContent = (id: string, feedback: string) => {
 export const ModelApi = {
   getAnswerByUser,
   getAnswerByCustomer,
+  deleteConversationUser,
   getConversationUser,
   getConversationContent,
   ratingConversationContent,

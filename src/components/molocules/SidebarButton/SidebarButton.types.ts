@@ -6,4 +6,5 @@ export interface SidebarButtonProps
   text: string;
   type?: "action" | "content" | "user";
   active?: boolean;
+  onDelete?: () => void;
 }

@@ -44,8 +44,6 @@ const Page = () => {
   const handleGetHistory = useCallback(async () => {
     try {
       const res = await ModelApi.getConversationUser();
-      console.log(res.data);
-
       setData(res.data.data);
     } catch (error) {
       console.log(error);
@@ -70,7 +68,6 @@ const Page = () => {
       setContents([]);
       setCurrentConversation(data);
       const res = await ModelApi.getConversationContent(data._id);
-      console.log(res.data.data.content);
       setContents(res.data.data.content);
     } catch (error) {
       console.log(error);
@@ -165,6 +162,22 @@ const Page = () => {
     setContents([]);
   }, []);
 
+  const handleDeleteChat = useCallback(
+    async (id: string) => {
+      try {
+        await ModelApi.deleteConversationUser(id);
+        await handleGetHistory();
+        if (id === currentConversation?._id) {
+          setCurrentConversation(undefined);
+          setContents([]);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [handleGetHistory, currentConversation]
+  );
+
   return (
     <div className="bg-white relative z-0 flex h-screen w-full overflow-hidden">
       <div
@@ -189,6 +202,10 @@ const Page = () => {
                   text={conversation.title}
                   key={conversation._id}
                   active={currentConversation?._id === conversation._id}
+                  className="gap-3"
+                  onDelete={() => {
+                    handleDeleteChat(conversation._id);
+                  }}
                   onClick={() => {
                     handleClickConversation(conversation);
                   }}
@@ -236,61 +253,9 @@ const Page = () => {
           >
             <Image src={MenuIcon} alt="Logo" className="w-[15px] h-[15px]" />
           </div>
-          <Dropdown
-            menu={{
-              items: [
-                {
-                  key: "1",
-                  label: (
-                    <div
-                      onClick={() => {
-                        setVersion(1);
-                      }}
-                      className="h-[30px] flex flex-row items-center"
-                    >
-                      <span className="ml-3 text-base font-sans text-black">
-                        LLAMA
-                      </span>
-                    </div>
-                  ),
-                },
-                {
-                  key: "2",
-                  label: (
-                    <div
-                      onClick={() => {
-                        setVersion(2);
-                      }}
-                      className="h-[30px] flex flex-row items-center"
-                    >
-                      <span className="ml-3 text-base font-sans text-black">
-                        BLOOMZ
-                      </span>
-                    </div>
-                  ),
-                },
-                {
-                  key: "3",
-                  label: (
-                    <div
-                      onClick={() => {
-                        setVersion(3);
-                      }}
-                      className="h-[30px] flex flex-row items-center"
-                    >
-                      <span className="ml-3 text-base font-sans text-black">
-                        QWEN
-                      </span>
-                    </div>
-                  ),
-                },
-              ],
-            }}
-          >
-            <span className="text-2xl font-sans font-medium text-black p-3 cursor-pointer">
-              Quiz
-            </span>
-          </Dropdown>
+          <span className="text-2xl font-sans font-medium text-black p-3 cursor-pointer">
+            Quiz
+          </span>
         </div>
         <div
           className="overflow-y-auto h-full w-full flex-1 overflow-hidden items-center flex flex-col"

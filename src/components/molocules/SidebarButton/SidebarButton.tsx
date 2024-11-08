@@ -1,13 +1,19 @@
 import React, { FC, useMemo } from "react";
 import { SidebarButtonProps } from "./SidebarButton.types";
 import Image from "next/image";
-import { DefaultAvatarIcon, NewChatIcon, SmallLogoIcon } from "@/assets/icons";
+import {
+  DefaultAvatarIcon,
+  NewChatIcon,
+  SmallLogoIcon,
+  DeleteIcon,
+} from "@/assets/icons";
 
 const SidebarButton: FC<SidebarButtonProps> = ({
   text,
   type = "content",
   className,
   active = false,
+  onDelete,
   ...props
 }) => {
   const icon = useMemo(() => {
@@ -39,17 +45,30 @@ const SidebarButton: FC<SidebarButtonProps> = ({
       );
     }
 
-    return <></>;
+    return (
+      <div className="flex justify-end items-end w-[20%] z-30 ">
+        <div
+          className="hover:bg-red-200 rounded-[4px] p-[2px]"
+          onClick={() => {
+            console.log("delete");
+
+            if (onDelete) onDelete();
+          }}
+        >
+          <Image src={DeleteIcon} alt="Delete" className="w-[20px] h-[20px]" />
+        </div>
+      </div>
+    );
   }, [type]);
 
   return (
     <div
-      className={`flex flex-row items-center cursor-pointer p-[10px] hover:bg-gray-200 rounded-xl justify-between ${className} ${
+      className={`flex flex-row items-center cursor-pointer p-[10px] z-10 hover:bg-gray-200 rounded-xl justify-between ${className} ${
         active && "bg-gray-200"
       }`}
       {...props}
     >
-      <div className="flex flex-row items-center gap-3 whitespace-nowrap overflow-hidden">
+      <div className="flex flex-row items-center gap-3 whitespace-nowrap w-[70%] overflow-hidden">
         {icon}
         <span className="font-sans font-medium text-black text-base text-ellipsis w-full overflow-hidden ">
           {text}

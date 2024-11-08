@@ -9,7 +9,7 @@ const AuthGuard = ({ children }: { children: JSX.Element }) => {
   const { user } = useSelector(authSelector);
 
   useEffect(() => {
-    if (user?.role !== 2) {
+    if (!user) {
       router.push("/");
     }
   }, [user]);
