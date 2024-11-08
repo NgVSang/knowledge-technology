@@ -37,10 +37,10 @@ const Page = () => {
     useState<IConversation>();
 
   useEffect(() => {
-    if (user && user.role === 2) {
-      router.push("/admin");
+    if (!user) {
+      router.push("/login");
     }
-  }, []);
+  }, [user]);
 
   const handleGetHistory = useCallback(async () => {
     try {
